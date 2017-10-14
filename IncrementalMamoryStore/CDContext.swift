@@ -23,11 +23,11 @@ extension CDContext {
             return context
         }()
         
-        lazy var backgroundContext: CDContext = {
+        var backgroundContext: CDContext {
             let context = CDContext(concurrencyType: .privateQueueConcurrencyType)
-            context.parent = self.viewContext
+            context.parent = viewContext
             return context
-        }()
+        }
         
         init() {
             let url = Bundle.main.url(forResource: "DataModel", withExtension: "momd")!

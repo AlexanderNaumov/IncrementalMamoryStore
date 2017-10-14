@@ -67,9 +67,22 @@ class IncrementalMamoryStore: NSIncrementalStore {
     
     private func parse(predicate: NSPredicate) -> NSPredicate {
         let objectID = { (object: Any) -> Any? in
-            return ((object as? NSManagedObject)?.objectID).map(self.referenceObject)
-                ?? (object as? Set<NSManagedObject>)?.map { self.referenceObject(for: $0.objectID) }
-                ?? (object as? [NSManagedObject])?.map { self.referenceObject(for: $0.objectID) }
+            switch object {
+            case let object as NSManagedObject:
+                return self.referenceObject(for: object.objectID)
+            case let array as [NSManagedObject]:
+                return array.map { self.referenceObject(for: $0.objectID) }
+            case let set as Set<NSManagedObject>:
+                return set.map { self.referenceObject(for: $0.objectID) }
+            case let objectId as NSManagedObjectID:
+                return self.referenceObject(for: objectId)
+            case let array as [NSManagedObjectID]:
+                return array.map { self.referenceObject(for: $0) }
+            case let set as Set<NSManagedObjectID>:
+                return set.map { self.referenceObject(for: $0) }
+            default:
+                return nil
+            }
         }
         guard let _predicate = predicate as? NSComparisonPredicate, _predicate.rightExpression.expressionType == .constantValue,
             let object = _predicate.rightExpression.constantValue.flatMap(objectID) else { return predicate }
@@ -100,7 +113,7 @@ class IncrementalMamoryStore: NSIncrementalStore {
     }
     
     override func obtainPermanentIDs(for array: [NSManagedObject]) throws -> [NSManagedObjectID] {
-        return array.map { newObjectID(for: $0.entity, referenceObject: UUID().uuidString) }
+        return array.map { newObjectID(for: $0.entity, referenceObject: "ID-\(UUID().uuidString)") }
     }
     
     override func newValuesForObject(with objectID: NSManagedObjectID, with context: NSManagedObjectContext) throws -> NSIncrementalStoreNode {
