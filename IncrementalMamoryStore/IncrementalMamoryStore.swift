@@ -85,10 +85,10 @@ class IncrementalMamoryStore: NSIncrementalStore {
             }
         }
         guard let _predicate = predicate as? NSComparisonPredicate, _predicate.rightExpression.expressionType == .constantValue,
-            let object = _predicate.rightExpression.constantValue.flatMap(referenceId) else { return predicate }
+            let value = _predicate.rightExpression.constantValue.flatMap(referenceId) else { return predicate }
         return NSComparisonPredicate(
             leftExpression: _predicate.leftExpression.description == "SELF" ? NSExpression(forKeyPath: "referenceId") : _predicate.leftExpression,
-            rightExpression: NSExpression(format: "%@", object as! CVarArg),
+            rightExpression: NSExpression(format: "%@", value as! CVarArg),
             modifier: _predicate.comparisonPredicateModifier,
             type: _predicate.predicateOperatorType,
             options: _predicate.options
