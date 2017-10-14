@@ -66,7 +66,7 @@ class IncrementalMamoryStore: NSIncrementalStore {
     }
     
     private func parse(predicate: NSPredicate) -> NSPredicate {
-        let objectID = { (object: Any) -> Any? in
+        let referenceId = { (object: Any) -> Any? in
             switch object {
             case let object as NSManagedObject:
                 return self.referenceObject(for: object.objectID)
@@ -85,7 +85,7 @@ class IncrementalMamoryStore: NSIncrementalStore {
             }
         }
         guard let _predicate = predicate as? NSComparisonPredicate, _predicate.rightExpression.expressionType == .constantValue,
-            let object = _predicate.rightExpression.constantValue.flatMap(objectID) else { return predicate }
+            let object = _predicate.rightExpression.constantValue.flatMap(referenceId) else { return predicate }
         return NSComparisonPredicate(
             leftExpression: _predicate.leftExpression.description == "SELF" ? NSExpression(forKeyPath: "referenceId") : _predicate.leftExpression,
             rightExpression: NSExpression(format: "%@", object as! CVarArg),
